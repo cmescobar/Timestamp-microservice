@@ -4,6 +4,7 @@
 // init project
 var express = require('express');
 var app = express();
+var utils = require('./utils')
 
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
 // so that your API is remotely testable by FCC 
@@ -24,18 +25,56 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
+
+
 app.get("/api/:date", function (req, res) {
   // Get the input date
-  const dateRaw = parseInt(req.params.date);
-  
-  //  Transform into utc format
-  const dateUTC = new Date(dateRaw);
+  const dateRaw = req.params.date;
+  let dateUnix;
+  let dateUTC;
+
+  if (utils.isDateStringValid(dateRaw)){
+    //  Transform into utc format
+    date = new Date(dateRaw);
+
+    // In this case, we need to get both of them
+    dateUnix = date.getTime();
+    dateUTC = date.toUTCString();
+  } 
+  else if (utils.isDateUnixValid(dateRaw)) {
+    dateUnix = parseInt(dateRaw);
+
+    //  Transform into utc format
+    date = new Date(dateUnix);
+
+    // In this case, we need to get both of them
+    dateUTC = date.toUTCString();
+  }
+  else {
+    res.json({'error': 'Invalid Date'});
+    return;
+  }
 
   // Output object
-  let output = {unix: dateRaw, utc: dateUTC.toUTCString()}
+  let output = {unix: dateUnix, utc: dateUTC}
 
   res.json(output);
 });
+
+
+app.get("/api", function (req, res) {
+  // Get the input date
+  const date = new Date();
+  
+  let dateUnix = date.getTime();
+  let dateUTC = date.toUTCString();
+
+  // Output object
+  let output = {unix: dateUnix, utc: dateUTC}
+
+  res.json(output);
+});
+
 
 
 
